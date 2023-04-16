@@ -7,11 +7,10 @@ import torch
 from lightning import LightningDataModule
 from mmengine.runner import Runner
 
-from src.utils.recog.datamodule import VideoInit
+import src.utils.recog.datamodule 
 
 class RegDataModule(LightningDataModule):
     """Example of LightningDataModule for MNIST dataset.
-
     A DataModule implements 6 key methods:
         def prepare_data(self):
             # things to do on 1 GPU/TPU (not on every GPU/TPU in DDP)
@@ -28,10 +27,8 @@ class RegDataModule(LightningDataModule):
         def teardown(self):
             # called on every process in DDP
             # clean up after fit or test
-
     This allows you to share a full dataset without explaining how to download,
     split, transform and process the data.
-
     Read the docs:
         https://lightning.ai/docs/pytorch/latest/data/datamodule.html
     """
@@ -120,7 +117,6 @@ class RegDataModule(LightningDataModule):
 
     def prepare_data(self):
         """Download data if needed.
-
         Do not use it to assign state (self.x = y).
         """
         pass
@@ -129,7 +125,6 @@ class RegDataModule(LightningDataModule):
 
     def setup(self, stage: Optional[str] = None):
         """Load data. Set variables: `self.data_train`, `self.data_val`, `self.data_test`.
-
         This method is called by lightning with both `trainer.fit()` and `trainer.test()`, so be
         careful not to execute things like random split twice!
         """
