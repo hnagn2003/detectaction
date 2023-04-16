@@ -7,7 +7,7 @@ import torch
 from lightning import LightningDataModule
 from mmengine.runner import Runner
 
-from .utils import VideoInit
+from src.utils.recog.datamodule import VideoInit
 
 class RegDataModule(LightningDataModule):
     """Example of LightningDataModule for MNIST dataset.

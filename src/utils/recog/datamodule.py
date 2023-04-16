@@ -3,12 +3,6 @@ from mmaction.utils import register_all_modules
 register_all_modules(init_default_scope=True)
 from typing import Any, Dict, Optional, Tuple
 import os.path as osp
-import torch
-from lightning import LightningDataModule
-from torch.utils.data import ConcatDataset, DataLoader, Dataset, random_split
-from torchvision.datasets import MNIST
-from torchvision.transforms import transforms
-from mmengine.runner import Runner
 import mmcv
 import decord
 import numpy as np
