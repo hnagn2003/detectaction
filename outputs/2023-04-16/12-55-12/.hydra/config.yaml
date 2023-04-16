@@ -1,0 +1,13 @@
+pipeline:
+- type: VideoInit
+- type: VideoSample
+  clip_len: 16
+  num_clips: 1
+  test_mode: false
+- type: VideoDecode
+- type: VideoResize
+  r_size: 256
+- type: VideoCrop
+  c_size: 224
+- type: VideoFormat
+- type: VideoPack
