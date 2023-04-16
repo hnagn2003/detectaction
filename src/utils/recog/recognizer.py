@@ -6,7 +6,10 @@ from mmengine.structures import LabelData
 from mmengine.model import BaseDataPreprocessor, stack_batch
 from mmaction.registry import MODELS
 from mmaction.utils import register_all_modules
+import torch
 
+
+@MODELS.register_module()
 class DataPreprocessorZelda(BaseDataPreprocessor):
     def __init__(self, mean, std):
         super().__init__()

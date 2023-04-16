@@ -4,7 +4,7 @@ from mmaction.registry import MODELS
 from mmaction.utils import register_all_modules
 
 register_all_modules(init_default_scope=True)
-from src.utils.recog.recognizer import RecognizerZelda, BackBoneZelda, ClsHeadZelda #dont delete this
+import src.utils.recog.recognizer #dont delete this
 
 class SimpleRecog(nn.Module):
     def __init__(
@@ -14,7 +14,10 @@ class SimpleRecog(nn.Module):
         type_cls_head='ClsHeadZelda',
         num_classes=2,
         in_channels=128,
-        average_clips='prob'
+        average_clips='prob',
+        type_data_processor='DataPreprocessorZelda',
+        mean=[123.675, 116.28, 103.53],
+        std=[58.395, 57.12, 57.375]
     ):
         super().__init__()
         backbone=dict(type=type_backbone),
@@ -31,7 +34,11 @@ class SimpleRecog(nn.Module):
                 type='ClsHeadZelda',
                 num_classes=2,
                 in_channels=128,
-                average_clips='prob'))
+                average_clips='prob'),
+            data_preprocessor = dict(
+                type='DataPreprocessorZelda',
+                mean=[123.675, 116.28, 103.53],
+                std=[58.395, 57.12, 57.375]))
         self.model = MODELS.build(model_cfg)
     def forward(self, x):
         return self.model.forward(x)
