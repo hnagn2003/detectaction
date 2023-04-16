@@ -1,22 +1,26 @@
-_target_: src.data.recog_datamodule.RegDataModule
+_target_: src.models.recog_eval_module.RegLitModule
 
-data_dir: data/kinetics400
-batch_size: 16
-train_val_test_split: [216228, 17728, 34752]
-num_workers: 0
-pin_memory: False
+optimizer:
+  _target_: torch.optim.Adam
+  _partial_: true
+  lr: 0.001
+  weight_decay: 0.0
 
-# data_train:
-#   _target_: src.data.reg_datamodule.RegDataset
-#   _partial_: true # need_to supply data_dir in setup()
-#   annotations_file: train.csv
+scheduler:
+  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+  _partial_: true
+  mode: min
+  factor: 0.1
+  patience: 10
 
-# data_val:
-#   _target_: src.data.reg_datamodule.RegDataset
-#   _partial_: true # need_to supply data_dir in setup()
-#   annotations_file: validate.csv ###CSV_FILE
-
-# data_test:
-#   _target_: src.data.reg_datamodule.RegDataset
-#   _partial_: true # need_to supply data_dir in setup()
-#   annotations_file: test.csv ###CSV_FILE
+net : 
+  _target_: src.models.components.recognizer.SimpleRecog
+  # config_file: '/home/nnthao/ActionRecog/actiondetect/mmaction2/configs/recognition/tsn/tsn_imagenet-pretrained-r50_8xb32-1x1x5-100e_kinetics400-rgb.py'
+  # checkpoint_file: 'src/models/checkpoints/tsn_r50_video_1x1x8_100e_kinetics400_rgb_20200702-568cde33.pth'
+  # device : 'cpu'
+  # type : 'RecognizerZelda'
+  # type_backbone: 'BackBoneZelda'
+  # type_cls_head: 'ClsHeadZelda'
+  num_classes: 2
+  in_channels: 128
+  # average_clips: 'prob'

@@ -49,6 +49,7 @@ if __name__ == "__main__":
     
     _ = SimpleRecog()
     x = torch.randn(2,10,3,10,224,224) #batch frame channel segments H W
+    
     # device = torch.device('cuda')
     # x = x.to( torch.device(device))
 # print(x.shape)
