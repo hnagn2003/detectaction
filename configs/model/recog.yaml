@@ -1,0 +1,22 @@
+_target_: src.data.recog_datamodule.RegDataModule
+
+data_dir: data/kinetics400
+batch_size: 16
+train_val_test_split: [216228, 17728, 34752]
+num_workers: 0
+pin_memory: False
+
+# data_train:
+#   _target_: src.data.reg_datamodule.RegDataset
+#   _partial_: true # need_to supply data_dir in setup()
+#   annotations_file: train.csv
+
+# data_val:
+#   _target_: src.data.reg_datamodule.RegDataset
+#   _partial_: true # need_to supply data_dir in setup()
+#   annotations_file: validate.csv ###CSV_FILE
+
+# data_test:
+#   _target_: src.data.reg_datamodule.RegDataset
+#   _partial_: true # need_to supply data_dir in setup()
+#   annotations_file: test.csv ###CSV_FILE
