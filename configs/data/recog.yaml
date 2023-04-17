@@ -1,6 +1,6 @@
 _target_: src.data.recog_datamodule.RegDataModule
 data_dir: data/kinetics400
-batch_size: 16
+batch_size: 2
 train_val_test_split: [216228, 17728, 34752]
 num_workers: 0
 pin_memory: False

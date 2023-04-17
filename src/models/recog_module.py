@@ -1,10 +1,10 @@
 from typing import Any
-
+from mmengine import Config
 import torch
 from lightning import LightningModule
 from torchmetrics import MaxMetric, MeanMetric
 from torchmetrics.classification.accuracy import Accuracy
-
+from mmaction.registry import MODELS
 
 class RegLitModule(LightningModule):
     """Example of LightningModule for MNIST classification.
@@ -26,7 +26,8 @@ class RegLitModule(LightningModule):
         net: torch.nn.Module,
         optimizer: torch.optim.Optimizer,
         scheduler: torch.optim.lr_scheduler,
-        num_classes : int = 10
+        # config_file : str = 'mmaction2/configs/recognition/tsn/tsn_imagenet-pretrained-r50_8xb32-1x1x3-100e_kinetics400-rgb.py',
+        num_classes : int = 2
     ):
         super().__init__()
 
@@ -34,6 +35,9 @@ class RegLitModule(LightningModule):
         # also ensures init params will be stored in ckpt
         self.save_hyperparameters(logger=False)
 
+        # self.config = Config.fromfile(config_file)
+        # self.model = MODELS.build(self.config.model)
+        # self.model.cls_head.num_classes = num_classes
         self.net = net
         # loss function
         self.criterion = torch.nn.CrossEntropyLoss()
@@ -51,7 +55,7 @@ class RegLitModule(LightningModule):
         # for tracking best so far validation accuracy
         self.val_acc_best = MaxMetric()
 
-    def forward(self, x: torch.Tensor):
+    def forward(self, x):
         return self.net(x)
 
     def on_train_start(self):
@@ -62,8 +66,12 @@ class RegLitModule(LightningModule):
         self.val_acc_best.reset()
 
     def model_step(self, batch: Any):
-        x, y = batch
-        logits = self.forward(x)
+        x = batch['inputs']
+        y = batch['data_samples']
+        data_samples = [d.to_dict() for d in y]
+        y = [d['gt_labels']['item'] for d in data_samples]
+        y = torch.tensor(y)
+        logits = self.forward(batch)
         loss = self.criterion(logits, y)
         preds = torch.argmax(logits, dim=1)
         return loss, preds, y
@@ -146,21 +154,27 @@ if __name__ == "__main__":
     output_path = path / "outputs"
     print("paths", path, config_path, output_path)
 
-    def test_net(cfg):
-        net = hydra.utils.instantiate(cfg.net)
-        print("*"*20+" net "+"*"*20, "\n", net)
-        output = net(torch.randn(2,10,3,10,224,224))
-        print("output", output.shape)
+    # def test_net(cfg):
+    #     net = hydra.utils.instantiate(cfg.net)
+    #     print("*"*20+" net "+"*"*20, "\n", net)
+    #     output = net(torch.randn(2,2,3,2,224,224))
+    #     print("output", output.shape)
 
     def test_module(cfg):
-        module = hydra.utils.instantiate(cfg)
-        output = module(torch.randn(2,10,3,10,224,224))
+        datamodule = hydra.utils.instantiate(cfg.data)
+        datamodule.prepare_data()
+        datamodule.setup()
+        loader = datamodule.train_dataloader()
+        # # loader
+        batch = next(iter(loader))
+        module = hydra.utils.instantiate(cfg.data)
+        output = module(torch.randn(2,2,3,2,224,224))
         print("module output", output.shape)
 
     @hydra.main(version_base="1.3", config_path=config_path, config_name="recog.yaml")
     def main(cfg: DictConfig):
         print(cfg)
-        test_net(cfg)
+        # test_net(cfg)
         test_module(cfg)
 
     main()

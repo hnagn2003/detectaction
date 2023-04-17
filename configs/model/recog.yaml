@@ -1,4 +1,4 @@
-_target_: src.models.recog_eval_module.RegLitModule
+_target_: src.models.recog_module.RegLitModule
 
 optimizer:
   _target_: torch.optim.Adam
@@ -13,14 +13,10 @@ scheduler:
   factor: 0.1
   patience: 10
 
+num_classes : 2
+
 net : 
-  _target_: src.models.components.recognizer.SimpleRecog
-  # config_file: '/home/nnthao/ActionRecog/actiondetect/mmaction2/configs/recognition/tsn/tsn_imagenet-pretrained-r50_8xb32-1x1x5-100e_kinetics400-rgb.py'
-  # checkpoint_file: 'src/models/checkpoints/tsn_r50_video_1x1x8_100e_kinetics400_rgb_20200702-568cde33.pth'
-  # device : 'cpu'
-  # type : 'RecognizerZelda'
-  # type_backbone: 'BackBoneZelda'
-  # type_cls_head: 'ClsHeadZelda'
+  _target_: src.models.components.recognizerCf.SimpleRecog
+  config_file: 'mmaction2/configs/recognition/tsn/tsn_imagenet-pretrained-r50_8xb32-1x1x3-100e_kinetics400-rgb.py'
   num_classes: 2
-  in_channels: 128
-  # average_clips: 'prob'
+  checkpoint_file : "tsn_r50_1x1x3_100e_kinetics400_rgb_20200614-e508be42.pth"
