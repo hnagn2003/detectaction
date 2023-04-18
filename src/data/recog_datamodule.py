@@ -6,8 +6,9 @@ import os.path as osp
 import torch
 from lightning import LightningDataModule
 from mmengine.runner import Runner
-
-import src.utils.recog.datamodule 
+from mmengine import Config
+import numpy as np
+# import src.utils.recog.datamodule 
 
 class RegDataModule(LightningDataModule):
     """Example of LightningDataModule for MNIST dataset.
@@ -44,72 +45,31 @@ class RegDataModule(LightningDataModule):
         data_root_train: str = "data/kinetics400_tiny/",
         ann_file_val: str = "kinetics_tiny_val_video.txt",
         data_root_val: str = "data/kinetics400_tiny/",
+        config_file : str = 'mmaction2/configs/recognition/tsn/tsn_imagenet-pretrained-r50_8xb32-1x1x3-100e_kinetics400-rgb.py',
+        train_data_prefix : str = 'data/kinetics400_tiny/train/',
+        val_data_prefix : str = 'data/kinetics400_tiny/val/'
     ):
         super().__init__()
 
         # this line allows to access init params with 'self.hparams' attribute
         # also ensures init params will be stored in ckpt
         self.save_hyperparameters(logger=False)
+        self.config = Config.fromfile(config_file)
 
-        # data transformations
-        self.train_pipeline_cfg = [
-            dict(type="VideoInit"),
-            dict(type="VideoSample", clip_len=16, num_clips=1, test_mode=False),
-            dict(type="VideoDecode"),
-            dict(type="VideoResize", r_size=256),
-            dict(type="VideoCrop", c_size=224),
-            dict(type="VideoFormat"),
-            dict(type="VideoPack"),
-        ]
-        self.val_pipeline_cfg = [
-            dict(type="VideoInit"),
-            dict(type="VideoSample", clip_len=16, num_clips=5, test_mode=True),
-            dict(type="VideoDecode"),
-            dict(type="VideoResize", r_size=256),
-            dict(type="VideoCrop", c_size=224),
-            dict(type="VideoFormat"),
-            dict(type="VideoPack"),
-        ]
-        self.train_dataset_cfg = dict(
-            type="DatasetZelda",
-            ann_file=ann_file_train,
-            pipeline=self.train_pipeline_cfg,
-            data_root=data_root_train,
-            data_prefix=dict(video="train"),
-        )
+        self.config.data_root = data_root_train
+        self.config.data_root_val = data_root_val
+        self.config.ann_file_train = ann_file_train
+        self.config.ann_file_val = ann_file_val
 
-        self.val_dataset_cfg = dict(
-            type="DatasetZelda",
-            ann_file=ann_file_val,
-            pipeline=self.val_pipeline_cfg,
-            data_root=data_root_val,
-            data_prefix=dict(video="val"),
-        )
+        self.config.test_dataloader.dataset.ann_file = data_root_val + ann_file_val
+        self.config.test_dataloader.dataset.data_prefix.video = val_data_prefix
+        self.config.train_dataloader.dataset.ann_file =data_root_train+ ann_file_train
+        self.config.train_dataloader.dataset.data_prefix.video = train_data_prefix
+        self.config.val_dataloader.dataset.ann_file =data_root_train+ ann_file_val
+        self.config.val_dataloader.dataset.data_prefix.video  = val_data_prefix
 
-        self.train_dataloader_cfg = dict(
-            batch_size=batch_size,
-            num_workers=num_workers,
-            persistent_workers=False,
-            sampler=dict(type="DefaultSampler", shuffle=True),
-            dataset=self.train_dataset_cfg,
-        )
-
-        self.val_dataloader_cfg = dict(
-            batch_size=batch_size,
-            num_workers=num_workers,
-            persistent_workers=False,
-            sampler=dict(type="DefaultSampler", shuffle=False),
-            dataset=self.val_dataset_cfg,
-        )
-        
-        
-        # self.transforms = transforms.Compose(
-        #     [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]
-        # )
-
-        # self.data_train: Optional[Dataset] = None
-        # self.data_val: Optional[Dataset] = None
-        # self.data_test: Optional[Dataset] = None
+        self.config.train_dataloader.batch_size = batch_size
+        self.config.val_dataloader.batch_size = batch_size
 
     @property
     def num_classes(self):
@@ -144,13 +104,13 @@ class RegDataModule(LightningDataModule):
         #     )
 
     def train_dataloader(self):
-        return Runner.build_dataloader(dataloader=self.train_dataloader_cfg)
+        return Runner.build_dataloader(dataloader=self.config.train_dataloader)
 
     def val_dataloader(self):
-        return Runner.build_dataloader(dataloader=self.val_dataloader_cfg)
+        return Runner.build_dataloader(dataloader=self.config.val_dataloader)
 
     def test_dataloader(self):
-        return Runner.build_dataloader(dataloader=self.val_dataloader_cfg)
+        return Runner.build_dataloader(dataloader=self.config.val_dataloader)
 
     def teardown(self, stage: Optional[str] = None):
         """Clean up after fit or test."""
@@ -198,7 +158,9 @@ if __name__ == "__main__":
         loader = datamodule.train_dataloader()
         # # loader
         batch = next(iter(loader))
-        print(batch)
+        print((batch['inputs']))
+        print("*"*20+" net "+"*"*20, "\n")
+        print(batch['data_samples'])
         
         # print("n_batch", len(loader), len(bx), len(by), type(by))
         

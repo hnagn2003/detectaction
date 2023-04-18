@@ -1,0 +1,3 @@
+defaults:
+  - data: recog.yaml # choose datamodule with `test_dataloader()` for evaluation
+  - model: recog.yaml
