@@ -1,2 +1,0 @@
-metrics_type: 'AccuracyMetric'
-topk: (1,5)

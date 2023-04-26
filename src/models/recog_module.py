@@ -66,12 +66,15 @@ class RegLitModule(LightningModule):
         self.val_acc_best.reset()
 
     def model_step(self, batch: Any):
-        x = batch['inputs']
         y = batch['data_samples']
         data_samples = [d.to_dict() for d in y]
         y = [d['gt_labels']['item'] for d in data_samples]
         y = torch.tensor(y)
+        param = (next(self.parameters()))
+        device = param.device
         logits = self.forward(batch)
+        if (y.device != device):
+            y=y.to(device)
         loss = self.criterion(logits, y)
         preds = torch.argmax(logits, dim=1)
         return loss, preds, y
@@ -169,7 +172,7 @@ if __name__ == "__main__":
         batch = next(iter(loader))
         module = hydra.utils.instantiate(cfg.data)
         output = module(torch.randn(2,2,3,2,224,224))
-        print("module output", output.shape)
+        # print("module output", output.shape)
 
     @hydra.main(version_base="1.3", config_path=config_path, config_name="recog.yaml")
     def main(cfg: DictConfig):

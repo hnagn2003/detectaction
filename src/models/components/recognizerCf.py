@@ -7,7 +7,10 @@ from lightning import LightningModule, LightningDataModule
 
 
 register_all_modules(init_default_scope=True)
-from src.utils.recog.recognizer import RecognizerZelda, BackBoneZelda, ClsHeadZelda #dont delete this
+from mmengine.model import BaseDataPreprocessor, stack_batch
+
+from src.utils.recog.recognizer import RecognizerZelda, BackBoneZelda, ClsHeadZelda, DataPreprocessorZelda #dont delete this
+
 
 class SimpleRecog(nn.Module):
     def __init__(
@@ -19,20 +22,54 @@ class SimpleRecog(nn.Module):
         super().__init__()
         self.config = Config.fromfile(config_file)
         self.config.model.cls_head.num_classes = num_classes
+        self.checkpoint_file = checkpoint_file
         if checkpoint_file is not None :
             self.config.load_from = checkpoint_file
         self.model = MODELS.build(self.config.model)
         
 
     def forward(self, x):
+        # _ = (tensor.to('cpu') for tensor in x["inputs"])
+        # self.model.to('cpu')
+        device = next(self.model.parameters())
+        data_preprocessor_cfg = dict(
+        type='DataPreprocessorZelda',
+        mean=[123.675, 116.28, 103.53],
+        std=[58.395, 57.12, 57.375])
+        self.model.data_preprocessor = MODELS.build(data_preprocessor_cfg)
         x = self.model.data_preprocessor(x, training=True)
-        output = self.model.forward(x["inputs"],x["data_samples"],mode = "predict")
+        # _ = (tensor.to(device) for tensor in x["inputs"])
+        # print(x["inputs"].device)
+        # self.model.to(device)
+        # x = [tensor.to(device) for tensor in x["inputs"]]
+        # output = self.model.forward(x["inputs"],x["data_samples"],mode = "predict") # bug
+        print(device)
+        if (device.is_cuda):
+            # for key in x:
+            #     x[key] = x[key].to('cuda')
+            x = recursive_to_device(x, 'cuda')
+        
+        output = self.model(**x, mode='predict')
         data_samples = [d.to_dict() for d in output]
         pred = [d['pred_scores']['item'] for d in data_samples]
         y = [d['gt_labels']['item'] for d in data_samples]
+        # stack all the preds to 1 tensor
         pred = torch.stack(pred)
+        # [tensor([1]), tensor([1])] -> tensor([1, 1])
         y = torch.tensor(y)
         return pred
+    
+
+def recursive_to_device(data, device):
+    if isinstance(data, torch.Tensor):
+        return data.to(device)
+    elif isinstance(data, dict):
+        return {k: recursive_to_device(v, device) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [recursive_to_device(x, device) for x in data]
+    else:
+        return data
+    
 if __name__ == "__main__":
     import pyrootutils
     from omegaconf import DictConfig
@@ -72,26 +109,6 @@ if __name__ == "__main__":
         print(y)
         print("******************************************")
         print(loss)
-
-
-        # print((batch['inputs']))
-        # print("*"*20+" net "+"*"*20, "\n")
-        # print(batch['data_samples'])
-        
-        # print("n_batch", len(loader), len(bx), len(by), type(by))
-        
-        # # for bx, by in tqdm(datamodule.train_dataloader()):
-        # #     pass
-        # # print("training data passed")
-
-        # # for bx, by in tqdm(datamodule.val_dataloader()):
-        # #     pass
-        # # print("validation data passed")
-
-        # for bx, by in tqdm(datamodule.test_dataloader()):
-        #     print(bx + ' ' + by)
-        #     pass
-        # print("test data passed")
 
     @hydra.main(version_base="1.3", config_path=config_path, config_name="recog.yaml")
     def main(cfg: DictConfig):

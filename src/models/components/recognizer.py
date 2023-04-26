@@ -4,7 +4,7 @@ from mmaction.registry import MODELS
 from mmaction.utils import register_all_modules
 
 register_all_modules(init_default_scope=True)
-import src.utils.recog.recognizer #dont delete this
+from src.utils.recog.recognizer import RecognizerZelda, BackBoneZelda, ClsHeadZelda, DataPreprocessorZelda #dont delete this
 
 class SimpleRecog(nn.Module):
     def __init__(
@@ -35,10 +35,7 @@ class SimpleRecog(nn.Module):
                 num_classes=2,
                 in_channels=128,
                 average_clips='prob'),
-            data_preprocessor = dict(
-                type='DataPreprocessorZelda',
-                mean=[123.675, 116.28, 103.53],
-                std=[58.395, 57.12, 57.375]))
+            )
         self.model = MODELS.build(model_cfg)
     def forward(self, x):
         return self.model.forward(x)
@@ -56,7 +53,6 @@ if __name__ == "__main__":
     
     _ = SimpleRecog()
     x = torch.randn(2,10,3,10,224,224) #batch frame channel segments H W
-    
     # device = torch.device('cuda')
     # x = x.to( torch.device(device))
 # print(x.shape)

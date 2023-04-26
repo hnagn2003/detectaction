@@ -64,6 +64,7 @@ def train(cfg: DictConfig) -> Tuple[dict, dict]:
 
     log.info(f"Instantiating trainer <{cfg.trainer._target_}>")
     trainer: Trainer = hydra.utils.instantiate(cfg.trainer, callbacks=callbacks, logger=logger)
+    print(trainer)
 
     object_dict = {
         "cfg": cfg,
@@ -73,19 +74,17 @@ def train(cfg: DictConfig) -> Tuple[dict, dict]:
         "logger": logger,
         "trainer": trainer,
     }
-
+    print(trainer)
     if logger:
         log.info("Logging hyperparameters!")
         utils.log_hyperparameters(object_dict)
 
-    if cfg.get("compile"):
-        log.info("Compiling model!")
-        model = torch.compile(model)
-
+    # if cfg.get("compile"):
+    #     log.info("Compiling model!")
+    #     model = torch.compile(model)
     if cfg.get("train"):
         log.info("Starting training!")
         trainer.fit(model=model, datamodule=datamodule, ckpt_path=cfg.get("ckpt_path"))
-
     train_metrics = trainer.callback_metrics
 
     if cfg.get("test"):

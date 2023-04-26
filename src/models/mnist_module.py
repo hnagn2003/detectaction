@@ -62,6 +62,7 @@ class MNISTLitModule(LightningModule):
         self.val_acc_best.reset()
 
     def model_step(self, batch: Any):
+        print(x.device)
         x, y = batch
         logits = self.forward(x)
         loss = self.criterion(logits, y)

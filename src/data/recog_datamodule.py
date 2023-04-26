@@ -36,11 +36,7 @@ class RegDataModule(LightningDataModule):
 
     def __init__(
         self,
-        data_dir: str = "data/",
-        train_val_test_split: Tuple[int, int, int] = (55_000, 5_000, 10_000),
         batch_size: int = 2,
-        num_workers: int = 0,
-        pin_memory: bool = False,
         ann_file_train: str = "kinetics_tiny_train_video.txt",
         data_root_train: str = "data/kinetics400_tiny/",
         ann_file_val: str = "kinetics_tiny_val_video.txt",

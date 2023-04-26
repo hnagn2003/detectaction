@@ -52,6 +52,8 @@ if __name__ == "__main__":
 
     def test_module(cfg):
         metric_cfg = dict(type=cfg.metrics_type, topk=cfg.topk)
+        metric = METRICS.build(metric_cfg)
+        data_samples = [d.to_dict() for d in predictions]
         # module = hydra.utils.instantiate(cfg)
         # output = module(torch.randn(1, 10, 3, 224, 224))
         # print("module output", output.shape)

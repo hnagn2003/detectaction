@@ -1,9 +1,5 @@
 _target_: src.data.recog_datamodule.RegDataModule
-data_dir: data/kinetics400
 batch_size: 2
-train_val_test_split: [216228, 17728, 34752]
-num_workers: 0
-pin_memory: False
 ann_file_train: "kinetics_tiny_train_video.txt"
 data_root_train: "data/kinetics400_tiny/"
 ann_file_val: "kinetics_tiny_val_video.txt"
