@@ -43,7 +43,7 @@ class SimpleRecog(nn.Module):
         # self.model.to(device)
         # x = [tensor.to(device) for tensor in x["inputs"]]
         # output = self.model.forward(x["inputs"],x["data_samples"],mode = "predict") # bug
-        print(device)
+        # print(device)
         if (device.is_cuda):
             # for key in x:
             #     x[key] = x[key].to('cuda')
@@ -83,7 +83,7 @@ if __name__ == "__main__":
         search_from=__file__, indicator=".project-root")
     config_path = str(path / "configs" / "data")
     output_path = path / "outputs"
-    print("root", path, config_path)
+    # print("root", path, config_path)
     # pyrootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 
 
@@ -91,7 +91,7 @@ if __name__ == "__main__":
         datamodule: LightningDataModule = hydra.utils.instantiate(cfg)
         model = SimpleRecog()
         
-        print(datamodule)
+        # print(datamodule)
         datamodule.prepare_data()
         datamodule.setup()
         loader = datamodule.train_dataloader()
@@ -105,10 +105,10 @@ if __name__ == "__main__":
         output = model(batch)
         loss = criterion(output, y)
         preds = torch.argmax(output, dim=1)
-        print(preds)
-        print(y)
-        print("******************************************")
-        print(loss)
+        # print(preds)
+        # print(y)
+        # print("******************************************")
+        # print(loss)
 
     @hydra.main(version_base="1.3", config_path=config_path, config_name="recog.yaml")
     def main(cfg: DictConfig):
