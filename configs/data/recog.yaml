@@ -4,3 +4,5 @@ ann_file_train: "kinetics_tiny_train_video.txt"
 data_root_train: "data/kinetics400_tiny/"
 ann_file_val: "kinetics_tiny_val_video.txt"
 data_root_val: "data/kinetics400_tiny/"
+num_workers: 0
+pin_memory: False

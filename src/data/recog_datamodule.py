@@ -43,7 +43,9 @@ class RegDataModule(LightningDataModule):
         data_root_val: str = "data/kinetics400_tiny/",
         config_file : str = 'mmaction2/configs/recognition/tsn/tsn_imagenet-pretrained-r50_8xb32-1x1x3-100e_kinetics400-rgb.py',
         train_data_prefix : str = 'data/kinetics400_tiny/train/',
-        val_data_prefix : str = 'data/kinetics400_tiny/val/'
+        val_data_prefix : str = 'data/kinetics400_tiny/val/',
+        num_workers: int = 16,
+        pin_memory: bool = True
     ):
         super().__init__()
 

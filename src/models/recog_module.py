@@ -4,7 +4,6 @@ import torch
 from lightning import LightningModule
 from torchmetrics import MaxMetric, MeanMetric
 from torchmetrics.classification.accuracy import Accuracy
-from mmaction.registry import MODELS
 
 class RegLitModule(LightningModule):
     """Example of LightningModule for MNIST classification.
@@ -28,7 +27,7 @@ class RegLitModule(LightningModule):
         scheduler: torch.optim.lr_scheduler,
         # config_file : str = 'mmaction2/configs/recognition/tsn/tsn_imagenet-pretrained-r50_8xb32-1x1x3-100e_kinetics400-rgb.py',
         num_classes : int = 2
-    ):
+    ): 
         super().__init__()
 
         # this line allows to access init params with 'self.hparams' attribute
@@ -66,12 +65,17 @@ class RegLitModule(LightningModule):
         self.val_acc_best.reset()
 
     def model_step(self, batch: Any):
+        param = (next(self.parameters()))
+        device = param.device
+        if (batch['inputs'][0].device != device):
+            for key, value in batch.items():
+                for i, input in enumerate(value):
+                    # if torch.is_tensor(input):
+                    batch[key][i] = input.to(device)
         y = batch['data_samples']
         data_samples = [d.to_dict() for d in y]
         y = [d['gt_labels']['item'] for d in data_samples]
         y = torch.tensor(y)
-        param = (next(self.parameters()))
-        device = param.device
         logits = self.forward(batch)
         if (y.device != device):
             y=y.to(device)
@@ -80,6 +84,10 @@ class RegLitModule(LightningModule):
         return loss, preds, y
 
     def training_step(self, batch: Any, batch_idx: int):
+        # y = batch['data_samples']
+        # data_samples = [d.to_dict() for d in y]
+        # y = [d['gt_labels']['item'] for d in data_samples]
+        # y = torch.tensor(y)
         loss, preds, targets = self.model_step(batch)
 
         # update and log metrics
@@ -95,6 +103,11 @@ class RegLitModule(LightningModule):
         pass
 
     def validation_step(self, batch: Any, batch_idx: int):
+        y = batch['data_samples']
+        data_samples = [d.to_dict() for d in y]
+        y = [d['gt_labels']['item'] for d in data_samples]
+        y = torch.tensor(y)
+
         loss, preds, targets = self.model_step(batch)
 
         # update and log metrics

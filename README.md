@@ -1,10 +1,15 @@
-## 🚀  Installation
+# 🚀  Installation
 ```bash
 # clone project
 git clone https://github.com/hnagn2003/detectaction
 cd detectaction
+```
+## download example data
+Download [here](https://drive.google.com/drive/folders/1L17MLCVUfiJcl-xfXtS3i3arPmwVv-zV)
 
-# create conda environment
+Then put it to data/kinetics400_tiny
+## create conda environment
+```bash
 conda create -n myenv python=3.9
 conda activate myenv
 conda install pytorch torchvision -c pytorch
@@ -87,19 +92,15 @@ The directory structure of new project looks like this:
 <br>
 
 ## Config structure
-## Getting started
-### Training
+## Training
 ```bash
-# train
-python train.py
 
 #train with config
-python -m src.train trainer=gpu data.num_workers=10 data.pin_memory=true trainer.devices=1 +trainer.strategy=ddp model.net.model_name=resnet50 logger=wandb trainer.max_epochs=100
+python -m src.train trainer=gpu data.num_workers=10 data.batch_size=2 data.pin_memory=true trainer.devices=1  trainer.max_epochs=10
 
 # train with data config
-python -m src.train trainer=gpu data.batch_size=2 data.ann_file_train="kinetics_tiny_train_video.txt" data.data_root_train="data/kinetics400_tiny/" data.ann_file_val="kinetics_tiny_val_video.txt" data.data_root_val="data/kinetics400_tiny/"
+python -m src.train trainer=gpu data.num_workers=10 data.batch_size=2 data.pin_memory=true trainer.devices=1 data.ann_file_train="kinetics_tiny_train_video.txt" data.data_root_train="data/kinetics400_tiny/" data.ann_file_val="kinetics_tiny_val_video.txt" data.data_root_val="data/kinetics400_tiny/"
 
-#train 
 ```
 
 
